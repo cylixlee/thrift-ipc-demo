@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+vars:
+  GO_GENERATION_DIR: internal/thrift
+
+tasks:
+  gen:
+    desc: Generate Thrift boilerplates
+    cmds:
+      - task: gen-go
+
+  gen-go:
+    internal: true
+    shopt:
+      - globstar
+    cmds:
+      - mkdir -p {{.GO_GENERATION_DIR}}
+      - thrift -r -out {{.GO_GENERATION_DIR}} --gen go:skip_remote hello.thrift
+    silent: true
