@@ -4,6 +4,7 @@ version: "3"
 
 vars:
   GO_GENERATION_DIR: internal/thrift
+  PYTHON_GENERATION_DIR: src/client
   PYTHON_BUILD_FLAGS:
     - follow-imports
     - remove-output
@@ -24,10 +25,23 @@ tasks:
       - task: build-go
       - task: build-python
 
+  run:
+    desc: Run built executable
+    cmds:
+      - task: build
+        if: >-
+          [ ! -d build ]                                       || 
+          ([ ! -f build/client ] && [ ! -f build/client.exe ]) || 
+          ([ ! -f build/server ] && [ ! -f build/server.exe ])
+      - cd build && ./client
+    silent: true
+    interactive: true
+
   gen:
     desc: Generate Thrift boilerplates
     cmds:
       - task: gen-go
+      - task: gen-python
 
   build-go:
     internal: true
@@ -37,16 +51,23 @@ tasks:
 
   build-python:
     cmds:
-      - uv run -m nuitka --{{.PYTHON_BUILD_FLAGS | join " --"}} src/client/main.py
+      - uv run -m nuitka --{{.PYTHON_BUILD_FLAGS | join " --"}} main.py
       - mv build/client.dist/* build/
       - rm build/client.dist
     silent: true
 
   gen-go:
     internal: true
-    shopt:
-      - globstar
     cmds:
       - mkdir -p {{.GO_GENERATION_DIR}}
       - thrift -r -out {{.GO_GENERATION_DIR}} --gen go:skip_remote hello.thrift
+    silent: true
+
+  gen-python:
+    shopt:
+      - globstar
+    cmds:
+      - mkdir -p {{.PYTHON_GENERATION_DIR}}
+      - thrift -r -out {{.PYTHON_GENERATION_DIR}} --gen py:enum,type_hints hello.thrift
+      - rm src/client/**/*-remote
     silent: true
