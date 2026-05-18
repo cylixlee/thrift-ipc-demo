@@ -22,7 +22,7 @@ func (helloHandler) Hello(ctx context.Context, request *hello.HelloRequest) (*he
 }
 
 func main() {
-	server := stdio.NewServer(stdio.WithProcessor(hello.NewHelloProcessor(helloHandler{})))
+	server := stdio.NewServer(hello.NewHelloProcessor(helloHandler{}))
 
 	fmt.Fprintln(os.Stderr, "(go) Thrift over stdio serving...")
 	defer fmt.Fprintln(os.Stderr, "(go) Thrift over stdio shutting down...")

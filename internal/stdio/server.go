@@ -12,11 +12,12 @@ type StdioServer struct {
 	processor thrift.TProcessor
 }
 
-func NewServer(opts ...serverOption) *StdioServer {
+func NewServer(processor thrift.TProcessor, opts ...serverOption) *StdioServer {
 	transport := NewTransport()
 	defaultServer := &StdioServer{
 		transport: transport,
 		protocol:  thrift.NewTJSONProtocol(transport),
+		processor: processor,
 	}
 	for _, opt := range opts {
 		opt(defaultServer)
@@ -57,11 +58,5 @@ type serverOption func(*StdioServer)
 func WithProtocol(factory func(thrift.TTransport) thrift.TProtocol) serverOption {
 	return func(s *StdioServer) {
 		s.protocol = factory(s.transport)
-	}
-}
-
-func WithProcessor(processor thrift.TProcessor) serverOption {
-	return func(s *StdioServer) {
-		s.processor = processor
 	}
 }
