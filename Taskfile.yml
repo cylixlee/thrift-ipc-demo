@@ -4,12 +4,43 @@ version: "3"
 
 vars:
   GO_GENERATION_DIR: internal/thrift
+  PYTHON_BUILD_FLAGS:
+    - follow-imports
+    - remove-output
+    - mode=app-dist
+    - output-dir=build
+    - output-folder-name=client
 
 tasks:
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf build
+    silent: true
+
+  build:
+    desc: Build executables
+    cmds:
+      - task: build-go
+      - task: build-python
+
   gen:
     desc: Generate Thrift boilerplates
     cmds:
       - task: gen-go
+
+  build-go:
+    internal: true
+    cmds:
+      - go build -o build/ ./cmd/...
+    silent: true
+
+  build-python:
+    cmds:
+      - uv run -m nuitka --{{.PYTHON_BUILD_FLAGS | join " --"}} src/client/main.py
+      - mv build/client.dist/* build/
+      - rm build/client.dist
+    silent: true
 
   gen-go:
     internal: true
