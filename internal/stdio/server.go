@@ -6,15 +6,15 @@ import (
 	"github.com/apache/thrift/lib/go/thrift"
 )
 
-type StdioServer struct {
+type Server struct {
 	transport thrift.TTransport
 	protocol  thrift.TProtocol
 	processor thrift.TProcessor
 }
 
-func NewServer(processor thrift.TProcessor, opts ...serverOption) *StdioServer {
+func NewServer(processor thrift.TProcessor, opts ...serverOption) *Server {
 	transport := NewTransport()
-	defaultServer := &StdioServer{
+	defaultServer := &Server{
 		transport: transport,
 		protocol:  thrift.NewTJSONProtocol(transport),
 		processor: processor,
@@ -25,7 +25,7 @@ func NewServer(processor thrift.TProcessor, opts ...serverOption) *StdioServer {
 	return defaultServer
 }
 
-func (s *StdioServer) Serve(ctx context.Context) error {
+func (s *Server) Serve(ctx context.Context) error {
 	errChan := make(chan error)
 
 	go func() {
@@ -53,10 +53,10 @@ func (s *StdioServer) Serve(ctx context.Context) error {
 	}
 }
 
-type serverOption func(*StdioServer)
+type serverOption func(*Server)
 
 func WithProtocol(factory func(thrift.TTransport) thrift.TProtocol) serverOption {
-	return func(s *StdioServer) {
+	return func(s *Server) {
 		s.protocol = factory(s.transport)
 	}
 }
